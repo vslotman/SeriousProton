@@ -19,6 +19,11 @@ HttpServer::~HttpServer()
         delete handlers[n];
 }
 
+HttpServerConnection::~HttpServerConnection()
+{
+    socket.disconnect();
+}
+
 void HttpServer::update(float delta)
 {
     if (selector.wait(sf::microseconds(1)))
@@ -28,11 +33,13 @@ void HttpServer::update(float delta)
             HttpServerConnection* connection = new HttpServerConnection(this);
             if (listenSocket.accept(connection->socket) == sf::Socket::Done)
             {
-                connections.push_back(connection);
-                selector.add(connection->socket);
-            }else{
-                delete connection;
-            }
+                if (checkPermissions(connection))
+                {
+                    connections.push_back(connection);
+                    selector.add(connection->socket);
+                }
+                else delete connection;
+            } else delete connection;
         }
         for(unsigned int n=0; n<connections.size(); n++)
         {
@@ -47,6 +54,49 @@ void HttpServer::update(float delta)
             }
         }
     }
+}
+
+/** \brief Test if an IP address has access to the HTTP-server
+ * Match IP-address with list of addresses in HttpServer::allowed_http_from
+ * Wildcard character is *
+ *
+ * \param HttpServerConnection * connection: Pointer to a Connection-object
+ * \return bool: True if address is allowed to access
+ *
+ */
+bool HttpServer::checkPermissions(HttpServerConnection * connection)
+{
+    bool success;
+    string sIpAddr;
+    expandedIP remoteIp;
+    expandedIP filterIp;
+
+    sf::IpAddress ipAddr = connection->socket.getRemoteAddress();
+    sIpAddr = (string) ipAddr.toString();
+    remoteIp = sIpAddr.split(".");
+
+    for (unsigned int i = 0; i<allow_http_from.size(); i++ )
+    {
+        success = true;
+        filterIp = allow_http_from.at(i).split(".");
+
+        for (unsigned int n = 0; n<4; n++)
+        {
+            if ((filterIp[n] != remoteIp[n]) and (filterIp[n] != "*"))
+            {
+                success = false; // Match failed
+                break;
+            }
+        }
+        if (success == true)
+        {
+            LOG(DEBUG) << "Accepted connection from " << sIpAddr;
+            return success; // We have a match
+        }
+
+    }
+    LOG(DEBUG) << "Rejected connection from " << sIpAddr;
+    return success;
 }
 
 HttpServerConnection::HttpServerConnection(HttpServer* server)
@@ -315,6 +365,7 @@ void HttpServerConnection::sendData(const char* data, size_t data_length)
     socket.send(data, data_length);
     socket.send("\r\n", 2);
 }
+
 
 bool HttpRequestFileHandler::handleRequest(HttpRequest& request, HttpServerConnection* connection)
 {

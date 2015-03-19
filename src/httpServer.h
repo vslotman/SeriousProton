@@ -5,6 +5,8 @@
 #include "Updatable.h"
 #include "stringImproved.h"
 
+typedef std::vector<string> expandedIP;
+
 class HttpRequest : public sf::NonCopyable
 {
 public:
@@ -54,16 +56,15 @@ private:
     bool headers_send;
 public:
     sf::TcpSocket socket;
-
     HttpServerConnection(HttpServer* server);
     bool read();
     void sendData(const char* data, size_t data_length);
-    void sendString(string data) { sendData(data.c_str(), data.length()); }
-private:
-    bool handleLine(string line);
-
     string UriDecode(const string & sSrc);
     void parseUri(const string & sSrc);
+    void sendString(string data) { sendData(data.c_str(), data.length()); }
+    ~HttpServerConnection();
+private:
+    bool handleLine(string line);
     void handleRequest();
     void sendHeaders();
 };
@@ -76,9 +77,12 @@ private:
     sf::SocketSelector selector;
     std::vector<HttpServerConnection*> connections;
     std::vector<HttpRequestHandler*> handlers;
+    bool checkPermissions(HttpServerConnection * connection);
+
 public:
     HttpServer(int portNr = 80);
     ~HttpServer();
+    std::vector<string> allow_http_from;
 
     void addHandler(HttpRequestHandler* handler) { handlers.push_back(handler); }
 
@@ -86,6 +90,5 @@ public:
 
     friend class HttpServerConnection;
 };
-
 
 #endif//HTTP_SERVER_H
