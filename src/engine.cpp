@@ -60,7 +60,7 @@ void Engine::runMainLoop()
             elapsedTime += delta;
             CollisionManager::handleCollisions(delta);
             ScriptObject::clearDestroyedObjects();
-            
+
             sf::sleep(sf::seconds(1.0/60.0 - delta));
         }
     }else{
@@ -108,6 +108,10 @@ void Engine::runMainLoop()
                     InputHandler::mouse_button_down[event.mouseButton.button] = true;
                 if (event.type == sf::Event::MouseButtonReleased)
                     InputHandler::mouse_button_down[event.mouseButton.button] = false;
+                if (event.type == sf::Event::JoystickButtonPressed)
+                    InputHandler::joystick_button_down[event.joystickButton.button] = true;
+                if (event.type == sf::Event::JoystickButtonReleased)
+                    InputHandler::joystick_button_down[event.joystickButton.button] = false;
             }
 
 #ifdef DEBUG
@@ -134,7 +138,7 @@ void Engine::runMainLoop()
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Tilde))
                 delta *= 5.0;
     #endif
-            
+
             InputHandler::update();
             entityList.update();
             foreach(Updatable, u, updatableList)

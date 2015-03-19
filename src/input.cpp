@@ -3,12 +3,21 @@
 
 P<WindowManager> InputHandler::windowManager;
 bool InputHandler::touch_screen = false;
+bool InputHandler::joystick = false;
+int InputHandler::joystickHysteresis;
+bool InputHandler::joystickMoved = false;
 sf::Transform InputHandler::mouse_transform;
 
 sf::Vector2f InputHandler::mousePos;
 int InputHandler::mouse_wheel_delta;
+sf::Vector2f InputHandler::joystickPosXY;
+float InputHandler::joystick_xy_delta;
+
 bool InputHandler::mouse_button_down[sf::Mouse::ButtonCount];
 bool InputHandler::keyboard_button_down[sf::Keyboard::KeyCount];
+bool InputHandler::joystick_button_down[sf::Joystick::ButtonCount];
+float InputHandler::joystick_axis_pos[sf::Joystick::AxisCount];
+float InputHandler::axis_pos;
 
 bool InputHandler::mouseButtonDown[sf::Mouse::ButtonCount];
 bool InputHandler::mouseButtonPressed[sf::Mouse::ButtonCount];
@@ -16,12 +25,17 @@ bool InputHandler::mouseButtonReleased[sf::Mouse::ButtonCount];
 bool InputHandler::keyboardButtonDown[sf::Keyboard::KeyCount];
 bool InputHandler::keyboardButtonPressed[sf::Keyboard::KeyCount];
 bool InputHandler::keyboardButtonReleased[sf::Keyboard::KeyCount];
+bool InputHandler::joystickButtonDown[sf::Joystick::ButtonCount];
+bool InputHandler::joystickButtonPressed[sf::Joystick::ButtonCount];
+bool InputHandler::joystickButtonReleased[sf::Joystick::ButtonCount];
 string InputHandler::keyboard_text_entry;
 
 void InputHandler::initialize()
 {
     memset(mouse_button_down, 0, sizeof(mouse_button_down));
     memset(keyboard_button_down, 0, sizeof(keyboard_button_down));
+    memset(joystick_button_down, 0, sizeof(joystick_button_down));
+    memset(joystick_axis_pos, 0, sizeof(joystick_axis_pos));
 }
 
 void InputHandler::update()
@@ -41,7 +55,7 @@ void InputHandler::update()
         mouseButtonReleased[n] = (mouseButtonDown[n] && !down);
         mouseButtonDown[n] = down;
     }
-    
+
     for(unsigned int n=0; n<sf::Keyboard::KeyCount; n++)
     {
         bool down = keyboard_button_down[n];
@@ -49,7 +63,7 @@ void InputHandler::update()
         keyboardButtonReleased[n] = (keyboardButtonDown[n] && !down);
         keyboardButtonDown[n] = down;
     }
-    
+
     if (touch_screen)
     {
         bool any_button_down = false;
@@ -60,6 +74,33 @@ void InputHandler::update()
         {
             mousePos.x = -1;
             mousePos.y = -1;
+        }
+    }
+
+    if (joystick)
+    {
+        axis_pos = sf::Joystick::getAxisPosition(0, sf::Joystick::X);
+        if (abs(axis_pos) > joystickHysteresis)
+        {
+            joystickPosXY.x = axis_pos;
+            joystickMoved = true;
+        }
+        else joystickMoved = false;
+
+        axis_pos = sf::Joystick::getAxisPosition(0, sf::Joystick::Y);
+        if (abs(axis_pos) > joystickHysteresis)
+        {
+            joystickPosXY.y = axis_pos;
+            joystickMoved = true;
+        }
+        else joystickMoved = false;
+
+        for(unsigned int n=0; n<sf::Joystick::ButtonCount; n++)
+        {
+            bool down = joystick_button_down[n];
+            joystickButtonPressed[n] = (!joystickButtonDown[n] && down);
+            joystickButtonReleased[n] = (joystickButtonDown[n] && !down);
+            joystickButtonDown[n] = down;
         }
     }
 }
