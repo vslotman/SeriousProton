@@ -25,6 +25,12 @@ class InputHandler
     static float joystick_axis_pos[sf::Joystick::AxisCount];
 
     static sf::Vector2f joystickPosXY;
+    static float joystickPosZ;
+    static float joystickPosR;
+    static int   joystickPosPovX;
+    static int   joystickPosPovX_debounce;
+    static int   joystickPosPovY;
+    static int   joystickPosPovY_debounce;
     static float axis_pos;
     static float joystick_xy_delta;
     static bool joystickButtonDown[sf::Joystick::ButtonCount];
@@ -56,11 +62,17 @@ public:
     static int getMouseWheelDelta() { return mouse_wheel_delta; }
 
     static sf::Vector2f getJoystickPosXY() { return joystickPosXY; }
-    static bool joystickIsDown(unsigned int button) { return joystickButtonDown[button]; }
-    static bool joystickIsPressed(unsigned int button) { return joystickButtonPressed[button]; }
-    static bool joystickIsReleased(unsigned int button) { return joystickButtonReleased[button]; }
+    static float getJoystickPosZ() { return joystickPosZ; }
+    static float getJoystickPosR() { return joystickPosR; }
+    static int getJoystickPosPovX();
+    static int getJoystickPosPovY();
+    static bool joystickIsDown(unsigned int button) { return joystickButtonDown[button-1]; }
+    static bool joystickIsPressed(unsigned int button) { return joystickButtonPressed[button-1]; }
+    static bool joystickIsReleased(unsigned int button) { return joystickButtonReleased[button-1]; }
     static bool joystickHasMoved() { return joystickMoved; }
-    static float getJoystickXYDelta() { return joystick_xy_delta; }
+    //static sf::Vector2f getJoystickXYDelta() { return joystick_xy_delta; }
+    //static sf::Vector2f getJoystickZDelta() { return joystick_z_delta; }
+    //static float getJoystickRDelta() { return joystick_r_delta; }
 
     friend class Engine;
 };
