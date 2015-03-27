@@ -169,6 +169,11 @@ public:
         info.receiveFunction = &multiplayerReplicationFunctions<T>::receiveData;
         info.cleanupFunction = NULL;
         memberReplicationInfo.push_back(info);
+#ifdef DEBUG
+        if (multiplayerReplicationFunctions<T>::isChanged(member, &info.prev_data))
+        {
+        }
+#endif
     }
 
     template <typename T> void registerMemberReplication_(F_PARAM std::vector<T>* member, float update_delay = 0.0)
@@ -197,7 +202,7 @@ public:
         registerMemberReplication(&member->y, update_delay);
         registerMemberReplication(&member->z, update_delay);
     }
-    
+
     void updateMemberReplicationUpdateDelay(void* data, float update_delay)
     {
         for(unsigned int n=0; n<memberReplicationInfo.size(); n++)
@@ -210,7 +215,7 @@ public:
     int32_t getMultiplayerId() { return multiplayerObjectId; }
     void sendClientCommand(sf::Packet& packet);//Send a command from the client to the server.
 
-    virtual void onReceiveClientCommand(int32_t clientId, sf::Packet& packet) {} //Got data from a client, handle it.
+    virtual void onReceiveClientCommand(int32_t client_id, sf::Packet& packet) {} //Got data from a client, handle it.
 private:
     friend class GameServer;
     friend class GameClient;

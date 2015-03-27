@@ -53,7 +53,7 @@ public:
     static bool keyboardIsDown(sf::Keyboard::Key key) { return keyboardButtonDown[key]; }
     static bool keyboardIsPressed(sf::Keyboard::Key key) { return keyboardButtonPressed[key]; }
     static bool keyboardIsReleased(sf::Keyboard::Key key) { return keyboardButtonReleased[key]; }
-    static string getKeyboardTextEntry() { return keyboard_text_entry; }
+    static string getKeyboarddrawTextEntry() { return keyboard_text_entry; }
 
     static sf::Vector2f getMousePos() { return mousePos; }
     static bool mouseIsDown(sf::Mouse::Button button) { return mouseButtonDown[button]; }
