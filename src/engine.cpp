@@ -96,7 +96,7 @@ void Engine::runMainLoop()
             }
 
 #ifdef DEBUG
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape) && windowManager->hasFocus())
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Pause) && windowManager->hasFocus())
                 running = false;
 
             if (debugOutputClock.getElapsedTime().asSeconds() > 1.0)
